@@ -36,7 +36,7 @@ export function addLink(k, world, onLeave) {
   const link = k.add([
     ...visual(k, "link"),
     k.pos(p),
-    k.area({ collisionIgnore: ["player", "chicken"] }),
+    k.area({ collisionIgnore: ["player", "chicken"], scale: 0.5 }),
     k.body(),
     k.state("seek", ["seek", "throw", "cutGrass", "hitChicken", "flee", "leave"]),
     "link",

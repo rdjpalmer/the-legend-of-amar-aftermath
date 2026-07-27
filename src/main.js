@@ -15,6 +15,29 @@ const k = kaplay({
 // No gravity: this is a top-down game.
 k.setGravity(0);
 
+// Actor sprites.
+k.loadSprite("link", "assets/link.png");
+k.loadSprite("grass", "assets/grasss.png");
+k.loadSprite("player", "assets/actor.png");
+k.loadSprite("shard", "assets/shard.png");
+k.loadSprite("chicken", "assets/chicken.png");
+
+// Background music. Browsers block autoplay until the user interacts, so start
+// looping on the first key/click and keep the handle across scene changes.
+k.loadSound("bg-music", "src/assets/bg-music.mp3");
+let music = null;
+let muted = false;
+function startMusic() {
+  if (music || muted) return;
+  music = k.play("bg-music", { loop: true, volume: 0.5 });
+}
+k.onKeyPress(startMusic);
+k.onMousePress(startMusic);
+k.onKeyPress("m", () => {
+  muted = !muted;
+  if (music) music.paused = muted;
+});
+
 registerGameScene(k);
 registerEndScenes(k);
 k.go("game");
