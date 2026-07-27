@@ -13,7 +13,17 @@ const SPEC = {
   shard:    { shape: "rect", w: 12, h: 12, radius: 2, color: [212, 152, 90], outline: [132, 82, 40] },
 };
 
+// Kinds backed by a real loaded sprite (loadSprite name + render scale). Others
+// fall back to the placeholder shapes in SPEC.
+const SPRITES = {
+  link: { name: "link", scale: 0.44 },
+};
+
 export function visual(k, kind) {
+  const sp = SPRITES[kind];
+  if (sp) {
+    return [k.sprite(sp.name), k.anchor("center"), k.scale(sp.scale)];
+  }
   const s = SPEC[kind];
   const comps =
     s.shape === "circle"
