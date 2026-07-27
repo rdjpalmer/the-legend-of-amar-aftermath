@@ -1,6 +1,7 @@
 import kaplay from "https://unpkg.com/kaplay@3001.0.19/dist/kaplay.mjs";
 import { CANVAS_W, CANVAS_H } from "./config.js";
 import { registerGameScene } from "./scenes/game.js";
+import { registerEndScenes } from "./scenes/end.js";
 
 const k = kaplay({
   width: CANVAS_W,
@@ -15,6 +16,7 @@ const k = kaplay({
 k.setGravity(0);
 
 registerGameScene(k);
+registerEndScenes(k);
 k.go("game");
 
 // Dev-only handle for headless checks / console poking: open with ?debug.
