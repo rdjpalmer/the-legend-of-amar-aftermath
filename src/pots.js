@@ -112,9 +112,9 @@ function spawnShard(k, world, tile) {
   const s = k.add([
     ...visual(k, "shard"),
     k.pos(p.x + jx, p.y + jy),
-    k.area(),
+    k.area({ scale: 0.55 }),
     k.z(p.y),
-    k.rotate(k.rand() * 360),
+    k.rotate((k.rand() - 0.5) * 24), // slight tilt; keep debris upright-ish
     "shard",
   ]);
   return s;

@@ -17,6 +17,10 @@ const SPEC = {
 // fall back to the placeholder shapes in SPEC.
 const SPRITES = {
   link: { name: "link", scale: 0.44 },
+  grass: { name: "grass", scale: 1.6 }, // 16px tile -> ~26px clump
+  player: { name: "player", scale: 0.13 }, // 428px art -> ~52px tall
+  shard: { name: "shard", scale: 0.085 }, // 500px debris -> ~26px clump
+  chicken: { name: "chicken", scale: 1.1 },
 };
 
 export function visual(k, kind) {

@@ -17,7 +17,7 @@ export function addChicken(k, world, tile) {
   const chicken = k.add([
     ...visual(k, "chicken"),
     k.pos(p),
-    k.area({ collisionIgnore: ["player", "link", "chicken"] }),
+    k.area({ collisionIgnore: ["player", "link", "chicken"], scale: 0.7 }),
     k.body(),
     k.state("idle", ["idle", "chase"]),
     "chicken",
@@ -49,8 +49,10 @@ export function addChicken(k, world, tile) {
     }
     if (chicken.wanderTarget) {
       const d = world.tc(chicken.wanderTarget).sub(chicken.pos);
-      if (d.len() > 2) chicken.move(d.unit().scale(CHICKEN_SPEED * 0.4));
-      else chicken.wanderTarget = null;
+      if (d.len() > 2) {
+        if (Math.abs(d.x) > 1) chicken.flipX = d.x < 0;
+        chicken.move(d.unit().scale(CHICKEN_SPEED * 0.4));
+      } else chicken.wanderTarget = null;
     }
   });
 
@@ -64,7 +66,10 @@ export function addChicken(k, world, tile) {
       return;
     }
     const d = tgt.pos.sub(chicken.pos);
-    if (d.len() > 2) chicken.move(d.unit().scale(CHICKEN_SPEED));
+    if (d.len() > 2) {
+      if (Math.abs(d.x) > 1) chicken.flipX = d.x < 0;
+      chicken.move(d.unit().scale(CHICKEN_SPEED));
+    }
   });
 
   chicken.onUpdate(() => {

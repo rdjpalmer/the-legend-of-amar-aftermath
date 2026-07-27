@@ -17,6 +17,10 @@ k.setGravity(0);
 
 // Actor sprites.
 k.loadSprite("link", "assets/link.png");
+k.loadSprite("grass", "assets/grasss.png");
+k.loadSprite("player", "assets/actor.png");
+k.loadSprite("shard", "assets/shard.png");
+k.loadSprite("chicken", "assets/chicken.png");
 
 // Background music. Browsers block autoplay until the user interacts, so start
 // looping on the first key/click and keep the handle across scene changes.
