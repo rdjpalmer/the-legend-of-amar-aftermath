@@ -5,6 +5,7 @@ import { generate } from "../gen.js";
 import { visual } from "../sprites.js";
 import { addPlayer } from "../actors/player.js";
 import { addLink } from "../actors/link.js";
+import { addChicken } from "../actors/chicken.js";
 
 export function registerGameScene(k) {
   k.scene("game", (opts = {}) => {
@@ -81,7 +82,7 @@ export function registerGameScene(k) {
     );
     level.grass.forEach((t) => spawn("grass", t, [k.area()], "grass"));
     level.pots.forEach((t) => spawn("pot", t, [k.area()], "pot"));
-    level.chickens.forEach((t) => spawn("chicken", t, [k.area()], "chicken"));
+    level.chickens.forEach((t) => addChicken(k, world, t));
 
     // --- Actors ---
     addPlayer(k, world);

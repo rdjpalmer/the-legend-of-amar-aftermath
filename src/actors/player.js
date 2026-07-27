@@ -8,7 +8,7 @@ export function addPlayer(k, world) {
   const player = k.add([
     ...visual(k, "player"),
     k.pos(p),
-    k.area(),
+    k.area({ collisionIgnore: ["link", "chicken"] }),
     k.body(), // dynamic body: pushed out of static obstacles/walls
     "player",
   ]);

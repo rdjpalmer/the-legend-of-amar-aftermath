@@ -16,11 +16,21 @@ export const POT_COUNT = [5, 8];
 export const GRASS_COUNT = [8, 15];
 export const CHICKEN_COUNT = [2, 4];
 
-// Gameplay tuning (used from later milestones).
+// Gameplay tuning.
 export const THROW_TILES = [2, 3];
 export const SHARDS_PER_POT = [1, 3];
-export const DISTRACT_RADIUS = 4; // tiles
-export const FLEE_TIME = 1.5; // seconds
+
+// Distractions.
+export const DISTRACT_RADIUS = 4; // tiles: how far grass/chickens tempt Link
+export const DISTRACT_INTERVAL = 0.5; // seconds between distraction decisions
+export const DISTRACT_CHANCE = 0.6; // per-decision chance to divert when tempted
+export const GRASS_CUT_PAUSE = 0.35; // seconds Link lingers after cutting grass
+export const FLEE_TIME = 1.5; // seconds Link flees after hitting a chicken
+
+// Chickens.
+export const CHICKEN_SPEED = 105; // slower than Link so he can escape
+export const CHICKEN_CHASE_TIME = 2.2; // seconds a hit chicken chases
+export const CHICKEN_HIT_COOLDOWN = 4; // seconds before Link is tempted by it again
 
 // Draw layers. World entities use z = pos.y so lower sprites overlap higher
 // ones; ground sits below everything, flying pots and HUD above.
