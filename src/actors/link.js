@@ -1,14 +1,18 @@
 // Link: computer-controlled. Milestones 4-5-8 slice:
-//   seek  -> walk to the nearest pot
+//   seek  -> path to the nearest pot
 //   throw -> pick it up and hurl it (pots.js handles the arc + shatter)
-//   leave -> no pots left: walk to the exit gap and off-screen (ends the round)
-// Distractions (grass/chickens) arrive in a later milestone.
+//   leave -> no pots left: path to the exit gap and off-screen (ends the round)
+// Movement follows a BFS tile path (pathfind.js) so Link routes around terrain
+// instead of getting caught on it. Distractions arrive in a later milestone.
 
 import { TILE, LINK_SPEED } from "../config.js";
 import { visual } from "../sprites.js";
 import { throwPot } from "../pots.js";
+import { findPath } from "../pathfind.js";
 
 const INTERACT_DIST = TILE * 0.8;
+const WAYPOINT_DIST = TILE * 0.3; // how close before advancing to the next tile
+const REPATH_INTERVAL = 0.6; // seconds; recompute to self-heal if bumped
 
 export function addLink(k, world, onLeave) {
   const p = world.tc(world.level.linkSpawn);
@@ -21,19 +25,38 @@ export function addLink(k, world, onLeave) {
     "link",
   ]);
 
-  // Move toward a world position; returns distance remaining.
-  const stepToward = (target) => {
-    const d = target.sub(link.pos);
-    const dist = d.len();
-    if (dist > 1) link.move(d.unit().scale(LINK_SPEED));
-    return dist;
+  link.path = null;
+  link.pathGoal = null;
+  link.repath = 0;
+
+  // Path to `goalTile` and take one step along it. Recomputes when the goal
+  // changes, the path is spent, or the refresh timer elapses.
+  const navTo = (goalTile) => {
+    link.repath -= k.dt();
+    const from = world.toTile(link.pos);
+    const sameGoal =
+      link.pathGoal && link.pathGoal.x === goalTile.x && link.pathGoal.y === goalTile.y;
+
+    if (!sameGoal || !link.path || link.path.length === 0 || link.repath <= 0) {
+      link.path = findPath(world, from, goalTile);
+      link.pathGoal = { ...goalTile };
+      link.repath = REPATH_INTERVAL;
+    }
+
+    // Advance past any waypoint we've effectively reached.
+    while (link.path.length && link.pos.dist(world.tc(link.path[0])) <= WAYPOINT_DIST) {
+      link.path.shift();
+    }
+
+    const targetPos = link.path.length ? world.tc(link.path[0]) : world.tc(goalTile);
+    const d = targetPos.sub(link.pos);
+    if (d.len() > 1) link.move(d.unit().scale(LINK_SPEED));
   };
 
   const nearestPot = () => {
-    const pots = k.get("pot");
     let best = null;
     let bestD = Infinity;
-    for (const pot of pots) {
+    for (const pot of k.get("pot")) {
       const d = pot.pos.dist(link.pos);
       if (d < bestD) {
         bestD = d;
@@ -43,6 +66,12 @@ export function addLink(k, world, onLeave) {
     return best;
   };
 
+  const clearPath = () => {
+    link.path = null;
+    link.pathGoal = null;
+    link.repath = 0;
+  };
+
   // --- SEEK ---
   link.onStateUpdate("seek", () => {
     const pot = nearestPot();
@@ -50,14 +79,17 @@ export function addLink(k, world, onLeave) {
       link.enterState("leave");
       return;
     }
-    if (stepToward(pot.pos) <= INTERACT_DIST) {
+    if (pot.pos.dist(link.pos) <= INTERACT_DIST) {
       link.target = pot;
       link.enterState("throw");
+      return;
     }
+    navTo(world.toTile(pot.pos));
   });
 
   // --- THROW ---
   link.onStateEnter("throw", () => {
+    clearPath();
     const pot = link.target;
     if (!pot || pot.destroyed) {
       link.enterState("seek");
@@ -65,28 +97,25 @@ export function addLink(k, world, onLeave) {
     }
     const at = pot.pos.clone();
     pot.destroy(); // picked up
-    link.throwing = true;
-    throwPot(k, world, at, () => {
-      link.throwing = false;
-      link.enterState("seek");
-    });
+    throwPot(k, world, at, () => link.enterState("seek"));
   });
   // Stand still while the throw animation plays.
 
   // --- LEAVE ---
   link.onStateEnter("leave", () => {
+    clearPath();
     link.leaving = true;
   });
   link.onStateUpdate("leave", () => {
     const exitPos = world.tc(world.level.exit);
-    stepToward(exitPos);
-    // Once he reaches / passes the exit gap, he's gone.
     if (link.pos.dist(exitPos) < TILE * 0.5) {
       if (!link.gone) {
         link.gone = true;
         onLeave && onLeave();
       }
+      return;
     }
+    navTo(world.level.exit);
   });
 
   link.onUpdate(() => {

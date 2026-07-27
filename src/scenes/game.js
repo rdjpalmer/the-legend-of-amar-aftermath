@@ -8,7 +8,9 @@ import { addLink } from "../actors/link.js";
 
 export function registerGameScene(k) {
   k.scene("game", (opts = {}) => {
-    const seed = opts.seed ?? Math.floor(Math.random() * 1e9);
+    const urlSeed = Number(new URLSearchParams(location.search).get("seed"));
+    const seed =
+      opts.seed ?? (Number.isFinite(urlSeed) && urlSeed > 0 ? urlSeed : Math.floor(Math.random() * 1e9));
     const level = generate(k, seed);
     let roundOver = false;
 
